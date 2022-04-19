@@ -133,7 +133,7 @@ public class TraverseSupportTransactionInterceptor extends TransactionIntercepto
         @Override
         public <H extends Exception> boolean sequence(Traverser<V, H> traverser) throws E, H {
             TransactionInfo transactionInfo = TraverseSupportTransactionInterceptor.this.createTransactionIfNecessary(this.transactionManager, this.transactionAttribute,
-                    TraverseSupportTransactionInterceptor.this.methodIdentification(method, target, transactionAttribute));
+                    TraverseSupportTransactionInterceptor.this.methodIdentification(this.method, this.target, this.transactionAttribute));
 
             boolean result;
 
