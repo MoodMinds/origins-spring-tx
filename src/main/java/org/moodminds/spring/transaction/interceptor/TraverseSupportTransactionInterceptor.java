@@ -39,7 +39,7 @@ public class TraverseSupportTransactionInterceptor extends TransactionIntercepto
     public TraverseSupportTransactionInterceptor(TransactionManager transactionManager, TransactionAttributeSource transactionAttributeSource,
                                                  BeanFactory beanFactory, TransactionInterceptor transactionInterceptor) {
         super(transactionManager, transactionAttributeSource);
-        this.setBeanFactory(beanFactory);
+        setBeanFactory(beanFactory);
         this.transactionInterceptor = transactionInterceptor;
     }
 
@@ -54,9 +54,9 @@ public class TraverseSupportTransactionInterceptor extends TransactionIntercepto
         boolean isEmittable = Emittable.class.equals(returnType);
         if (isTraversable || isEmittable) {
             Class<?> target = invocation.getThis() != null ? getTargetClass(invocation.getThis()) : null;
-            TransactionAttribute transactionAttribute = ofNullable(this.getTransactionAttributeSource())
+            TransactionAttribute transactionAttribute = ofNullable(getTransactionAttributeSource())
                     .map(attributeSource -> attributeSource.getTransactionAttribute(method, target)).orElse(null);
-            TransactionManager transactionManager = this.determineTransactionManager(transactionAttribute);
+            TransactionManager transactionManager = determineTransactionManager(transactionAttribute);
             if (transactionManager instanceof PlatformTransactionManager) {
                 TraverseSupport<?, ?> traverseSupport = (TraverseSupport<?, ?>) invocation.proceed();
                 if (traverseSupport != null) {
@@ -68,7 +68,7 @@ public class TraverseSupportTransactionInterceptor extends TransactionIntercepto
                 }
             }
         }
-        return this.transactionInterceptor.invoke(invocation);
+        return transactionInterceptor.invoke(invocation);
     }
 
     /**
@@ -76,7 +76,7 @@ public class TraverseSupportTransactionInterceptor extends TransactionIntercepto
      */
     @Override
     public TransactionManager getTransactionManager() {
-        return this.transactionInterceptor.getTransactionManager();
+        return transactionInterceptor.getTransactionManager();
     }
 
     /**
@@ -84,11 +84,11 @@ public class TraverseSupportTransactionInterceptor extends TransactionIntercepto
      */
     @Override
     public TransactionAttributeSource getTransactionAttributeSource() {
-        return this.transactionInterceptor.getTransactionAttributeSource();
+        return transactionInterceptor.getTransactionAttributeSource();
     }
 
     private String methodIdentification(Method method, Class<?> targetClass, TransactionAttribute txAttr) {
-        String identification = this.methodIdentification(method, targetClass);
+        String identification = methodIdentification(method, targetClass);
         if (identification == null) {
             if (txAttr instanceof DefaultTransactionAttribute)
                 identification = ((DefaultTransactionAttribute) txAttr).getDescriptor();
@@ -132,21 +132,21 @@ public class TraverseSupportTransactionInterceptor extends TransactionIntercepto
 
         @Override
         public <H extends Exception> boolean sequence(Traverser<V, H> traverser) throws E, H {
-            TransactionInfo transactionInfo = TraverseSupportTransactionInterceptor.this.createTransactionIfNecessary(this.transactionManager, this.transactionAttribute,
-                    TraverseSupportTransactionInterceptor.this.methodIdentification(this.method, this.target, this.transactionAttribute));
+            TransactionInfo transactionInfo = createTransactionIfNecessary(transactionManager, transactionAttribute,
+                    methodIdentification(method, target, transactionAttribute));
 
             boolean result;
 
             try {
-                result = this.traverseSupport.sequence(traverser);
+                result = traverseSupport.sequence(traverser);
             } catch (Throwable ex) {
-                TraverseSupportTransactionInterceptor.this.completeTransactionAfterThrowing(transactionInfo, ex);
+                completeTransactionAfterThrowing(transactionInfo, ex);
                 return sneaky(ex);
             } finally {
-                TraverseSupportTransactionInterceptor.this.cleanupTransactionInfo(transactionInfo);
+                cleanupTransactionInfo(transactionInfo);
             }
 
-            TraverseSupportTransactionInterceptor.this.commitTransactionAfterReturning(transactionInfo);
+            commitTransactionAfterReturning(transactionInfo);
 
             return result;
         }

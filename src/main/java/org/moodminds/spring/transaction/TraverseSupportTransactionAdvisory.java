@@ -47,9 +47,9 @@ public class TraverseSupportTransactionAdvisory implements InitializingBean {
      */
     @Override
     public void afterPropertiesSet() {
-        this.transactionAttributeSourceAdvisor.setAdvice(new TraverseSupportTransactionInterceptor(
-                this.transactionManager, this.transactionAttributeSource,
-                this.beanFactory, this.transactionInterceptor)
+        transactionAttributeSourceAdvisor.setAdvice(new TraverseSupportTransactionInterceptor(
+                transactionManager, transactionAttributeSource,
+                beanFactory, transactionInterceptor)
         );
     }
 }
